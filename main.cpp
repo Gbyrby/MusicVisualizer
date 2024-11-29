@@ -179,9 +179,7 @@ int main(int, char**)
     glBindVertexArray(0);
     glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w-400, display_h);
+
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     int vScreenSizeLocation = glGetUniformLocation(shaderProgram, "vScreenSize");
@@ -231,7 +229,11 @@ int main(int, char**)
     while (!glfwWindowShouldClose(window))
 #endif
     {
-        
+        float vTime = glfwGetTime() / 2;
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glPixelZoom(1000, 1000);
+        glViewport(0, 0, display_w, display_h);
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -255,6 +257,9 @@ int main(int, char**)
         
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         ImGui::Begin("Shader settings");
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Text("Time %.3f", vTime);
+        ImGui::Text("Screen Size %ix%i", display_w , display_h);
         if (ImGui::CollapsingHeader("Color")) {
             float w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y) * 0.40f;
             ImGui::SetNextItemWidth(w);
@@ -308,13 +313,13 @@ int main(int, char**)
 
        
 
-        float vTime = glfwGetTime()/2;
+        
         
 
         
 
         glUniform1f(vTimeLocation, vTime);//+
-        glUniform2f(vScreenSizeLocation, display_w-400, display_h);//+
+        glUniform2f(vScreenSizeLocation, display_w, display_h);//+
         glUniform3f(vColorBackgroundLocation, 0.0f, 0.0f, 0.0f);//+
         glUniform3fv(vColorLocation,18, color);//+
         glUniform3fv(vRotationLocation, 9, Rotation);//+
