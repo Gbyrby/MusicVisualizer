@@ -1,0 +1,19 @@
+#extension GL_OES_standard_derivatives : enable
+precision mediump float;
+precision mediump int;
+uniform vec2 vScreenSize;
+uniform float vTime;
+
+void main( void ) {
+
+	vec2 position = ( gl_FragCoord.xy / vScreenSize.xy );
+
+	float color = 0.0;
+	color += sin( position.x * cos( vTime / 15.0 ) * 80.0 ) + cos( position.y * cos( vTime / 15.0 ) * 10.0 );
+	color += sin( position.y * sin( vTime / 10.0 ) * 40.0 ) + cos( position.x * sin( vTime / 25.0 ) * 40.0 );
+	color += sin( position.x * sin( vTime / 5.0 ) * 10.0 ) + sin( position.y * sin( vTime / 35.0 ) * 80.0 );
+	color *= sin( vTime / 10.0 ) * 0.5;
+
+	gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + vTime / 3.0 ) * 0.75 ), 1.0 );
+
+}

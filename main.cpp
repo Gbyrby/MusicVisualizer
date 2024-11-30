@@ -1,42 +1,36 @@
-// Dear ImGui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
-// (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #include "main.h"
-using namespace std;
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
+#include "Utils.h"
+#include "Shader.h"
+#include "GUI.h"
 
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
 
 
 
 
 // Main code
 int main(int, char**)
-{
+{   
     std::fstream file;
-    file.open("fragmentshader.txt");
+    file.open("ShaderCode/FragmentShaders/YandexBlob.txt");
     std::stringstream file_stringstream;
-
+   
     file_stringstream << file.rdbuf();
 
-    file.close();
+    
     std::string fragmentShaderText;
     fragmentShaderText = file_stringstream.str();
     const char* fragmentShaderSource = fragmentShaderText.c_str();
+    file.close();
+
+    std::fstream file1;
+    file1.open("ShaderCode/VertexShaders/VertexShader.txt");
+    std::stringstream file_stringstream1;
+    file_stringstream1 << file1.rdbuf();
+
+    file1.close();
+    std::string vertexShaderText;
+    vertexShaderText = file_stringstream1.str();
+    const char* vertexShaderSource = vertexShaderText.c_str();
 
 
     glfwSetErrorCallback(glfw_error_callback);
@@ -232,7 +226,6 @@ int main(int, char**)
         float vTime = glfwGetTime() / 2;
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
-        glPixelZoom(1000, 1000);
         glViewport(0, 0, display_w, display_h);
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -340,7 +333,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
+    
     glfwDestroyWindow(window);
     glfwTerminate();
 

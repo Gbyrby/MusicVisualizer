@@ -7,6 +7,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{f1cb16b4-c31f-456b-ad63-bd4c4e6ffd7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Headers">
+      <UniqueIdentifier>{29846161-c5f2-483b-a6af-9f2c42ae9f70}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,13 +36,28 @@
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
       <Filter>include</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="main.h">
+    <ClCompile Include="src\GUI.cpp">
       <Filter>src</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragmentshader.txt" />
+    <ClInclude Include="src\GUI.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shader.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
