@@ -45,6 +45,9 @@
     <ClCompile Include="src\Utils.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\App.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GUI.h">
@@ -57,6 +60,9 @@
       <Filter>src\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Shader.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App.h">
       <Filter>src\Headers</Filter>
     </ClInclude>
   </ItemGroup>
