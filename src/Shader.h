@@ -16,9 +16,10 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-using namespace std;
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
 
