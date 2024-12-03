@@ -18,7 +18,7 @@ int main(int, char**)
     const char* fragmentShaderText = fragmentShaderString.c_str();
     //std::cout << vertexShaderString;
 
-    APP app(900,500);
+    APP app(1280,720);
     app.UpdateShaders(vertexShaderText, fragmentShaderText);
     app.MainLoop();
     

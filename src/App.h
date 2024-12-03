@@ -132,8 +132,9 @@ public:
     void MainLoop() {
         
         ImGuiIO& io = ImGui::GetIO();
-        bool show_demo_window = false;
-        bool show_another_window = false;
+        bool static show_demo_window = false;
+        bool static show_another_window = false;
+        int static display_w, display_h;
         static int Vsync = 1;
         while (!glfwWindowShouldClose(window)) {
             glfwSwapInterval(Vsync);
@@ -145,7 +146,6 @@ public:
                 std::cout << "QUIT BY TIMEOUT" << std::endl;
                 break;}
             #endif // DEBUG
-            int display_w, display_h;
             glfwGetFramebufferSize(this->window, &display_w, &display_h);
             glViewport(0, 0, display_w, display_h);
             // Poll and handle events (inputs, window resize, etc.)
