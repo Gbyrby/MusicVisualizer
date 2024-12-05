@@ -18,7 +18,7 @@ class APP {
     int vInteractionLocation = 0;
 
     float color[18] = {
-            0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 1.0f,
             0.0f, 1.0f, 0.0f,
             0.0f, 1.0f, 1.0f,
             1.0f, 0.0f, 0.0f,
