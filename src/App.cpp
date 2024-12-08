@@ -1,8 +1,12 @@
 #include "App.h"
 
 
-//#define TIMEOUT
-#define TIMEOUT_TIME 2
+#ifdef _DEBUG
+#define TIMEOUT
+#define TIMEOUT_TIME 120
+#endif // DEBUG
+
+
 
 APP::APP(int ScrenWidth, int ScreenHeight) {
 
@@ -35,7 +39,7 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
     // Create window with graphics context
     window = glfwCreateWindow(ScrenWidth, ScreenHeight, "Music Visualizer", nullptr, nullptr);
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+   //glfwSwapInterval(1); // Enable vsync
 
     glewInit();
 
@@ -50,7 +54,7 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
@@ -79,7 +83,7 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
 
     // Our state
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    
 
     // build and compile our shader program
     // ------------------------------------
@@ -88,6 +92,7 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
     std::string fragmentShaderString = FileSystem::ReadFile("ShaderCode/FragmentShaders/YandexBlob.txt");
     const char* vertexShaderText = vertexShaderString.c_str();
     const char* fragmentShaderText = fragmentShaderString.c_str();
+
     this->UpdateShaders(vertexShaderText, fragmentShaderText);
 
 };
@@ -95,28 +100,51 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
 void APP::MainLoop() {
 
     ImGuiIO& io = ImGui::GetIO();
-    bool static show_demo_window = false;
-    bool static show_another_window = false;
-    int static display_w, display_h;
-    static int Vsync = 2;
 
-    static bool open_dockspace = true;
-    bool* p_open_dockspace = &open_dockspace;
+    static GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    static const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+    bool static darkTheme = true;
+
+    bool static show_demo_window = true;
+    bool static show_dockspace = true;
+    bool static show_settings_shader = true;
+    bool static show_settings_audio = true;
+    bool static show_settings_display = true;
+    bool static show_settings_other = true;
+    bool static show_settings_info = true;
+
+    bool static fullscreeen_mode = false;
+
+    int static display_w, display_h;
+    int static Vsync = 2;
+    
+    float static Scale = 100;
+
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    if (darkTheme) {
+        ImGui::StyleColorsDark();
+    }
+    else {
+        ImGui::StyleColorsLight();
+    }
+
 
     while (!glfwWindowShouldClose(window)) {
         glfwSwapInterval(Vsync);
 
         float vTime = glfwGetTime() / 2;
 
-    #ifdef TIMEOUT
+#ifdef TIMEOUT
         if (vTime > TIMEOUT_TIME) {
             std::cout << "QUIT BY TIMEOUT" << std::endl;
             break;
         }
-    #endif // TIMEOUT
+#endif // TIMEOUT
 
         glfwGetFramebufferSize(this->window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
+        
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -129,8 +157,15 @@ void APP::MainLoop() {
             continue;
         }
         glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w); 
+        glClear(GL_COLOR_BUFFER_BIT);
+
+
+        glViewport(0, 0, display_w / (100 / Scale), display_h / (100 / Scale));
+        
+        glLoadIdentity(); // загрузить идентичную матрицу
         glUniform1f(vTimeLocation, vTime);//+
-        glUniform2f(vScreenSizeLocation, display_w, display_h);//+
+        glUniform2f(vScreenSizeLocation, display_w/(100/Scale), display_h / (100 / Scale));//+
         glUniform3f(vColorBackgroundLocation, 0.0f, 0.0f, 0.0f);//+
         glUniform3fv(vColorLocation, 18, color);//+
         glUniform3fv(vRotationLocation, 9, Rotation);//+
@@ -139,12 +174,12 @@ void APP::MainLoop() {
         glUniform2fv(vInteractionPointLocation, 2, InteractionPoint);
         glUniform1f(vInteractionLocation, Interaction);
         glDrawArrays(GL_QUADS, 0, 4);
-        
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        if (open_dockspace) {
+        if (show_dockspace) {
             //CREATE DOCKSPACE
             static bool opt_padding = true;
             static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode;
@@ -173,7 +208,7 @@ void APP::MainLoop() {
             // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
             if (!opt_padding)
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            ImGui::Begin("DockSpace", p_open_dockspace, window_flags);
+            ImGui::Begin("DockSpace", &show_dockspace, window_flags);
             if (!opt_padding)
                 ImGui::PopStyleVar();
             ImGui::PopStyleVar(2);
@@ -190,81 +225,188 @@ void APP::MainLoop() {
             }
         }
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+        if (show_demo_window) 
             (ImGui::ShowDemoWindow(&show_demo_window));
+        
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        ImGui::Begin("Shader settings");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::Text("Time %.3f", vTime);
-        ImGui::Text("Screen Size %ix%i", display_w, display_h);
-        if (ImGui::Button("Button1")) {
-            std::string vertexShaderString = FileSystem::ReadFile("ShaderCode/VertexShaders/VertexShader.txt");
-            std::string fragmentShaderString = FileSystem::ReadFile("ShaderCode/FragmentShaders/Gradients.txt");
-            const char* vertexShaderText = vertexShaderString.c_str();
-            const char* fragmentShaderText = fragmentShaderString.c_str();
-            UpdateShaders(vertexShaderText, fragmentShaderText);
+        if (show_settings_shader) {
+            // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+            ImGui::Begin("Shader settings",&show_settings_shader);
+            if (ImGui::CollapsingHeader("Compiling settings")) {
+                //ImGui::BeginGroup("Compiling settings");
+                const char* Vitems[] = { "VertexShader" };
+                const char* Fitems[] = { "Gradients", "YandexBlob", "PurpleYellowWaves" };
+                static int Fitem_current = 0;
+                static int Vitem_current = 0;
 
-        }
+                ImGui::SeparatorText("Vertex shader");
+                ImGui::Combo("Vertex", &Vitem_current, Vitems, IM_ARRAYSIZE(Vitems));
 
-        if (ImGui::Button("Button2")) {
-            std::string vertexShaderString = FileSystem::ReadFile("ShaderCode/VertexShaders/VertexShader.txt");
-            std::string fragmentShaderString = FileSystem::ReadFile("ShaderCode/FragmentShaders/YandexBlob.txt");
-            const char* vertexShaderText = vertexShaderString.c_str();
-            const char* fragmentShaderText = fragmentShaderString.c_str();
-            UpdateShaders(vertexShaderText, fragmentShaderText);
-        }
+                ImGui::SeparatorText("Fragment shader");
+                ImGui::Combo("Fragment", &Fitem_current, Fitems, IM_ARRAYSIZE(Fitems));
 
-        if (ImGui::Button("Button3")) {
-            std::string vertexShaderString = FileSystem::ReadFile("ShaderCode/VertexShaders/VertexShader.txt");
-            std::string fragmentShaderString = FileSystem::ReadFile("ShaderCode/FragmentShaders/PurpleYellowWaves.txt");
-            const char* vertexShaderText = vertexShaderString.c_str();
-            const char* fragmentShaderText = fragmentShaderString.c_str();
-            UpdateShaders(vertexShaderText, fragmentShaderText);
-        }
-
-
-        ImGui::SliderInt("slider int", &Vsync, 0, 6);
-        if (ImGui::CollapsingHeader("Color")) {
-            float w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y) * 0.40f;
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##1", (float*)&color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##2", (float*)&color[3], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##3", (float*)&color[6], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##4", (float*)&color[9], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##5", (float*)&color[12], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-
-            ImGui::SetNextItemWidth(w);
-            ImGui::ColorPicker3("##MyColor##6", (float*)&color[15], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
-        };
-        if (ImGui::CollapsingHeader("Rotation")) {
-            ImGui::SliderFloat3("Rotation1", Rotation, 0, 1);
-            ImGui::SliderFloat3("Rotation2", &Rotation[3], 0, 1);
-            ImGui::SliderFloat3("Rotation3", &Rotation[6], 0, 1);
-        }
-        if (ImGui::CollapsingHeader("Audio")) {
-            ImGui::SliderFloat3("Audio", Audio, 0, 3);
-        }
-        if (ImGui::CollapsingHeader("React")) {
-            ImGui::SliderFloat3("React", React, 0, 1);
-        }
-        /* if (ImGui::CollapsingHeader("InteractionPoint (don`t work)")) {
-                ImGui::SliderFloat2("InteractionPoint", InteractionPoint, -1, 1);
+                if (ImGui::Button("Apply")) {
+                    std::string Vpath = "ShaderCode/VertexShaders/" + std::string(Vitems[Vitem_current]) + ".txt";
+                    std::string Fpath = "ShaderCode/FragmentShaders/" + std::string(Fitems[Fitem_current]) + ".txt";
+                    std::string vertexShaderString = FileSystem::ReadFile(Vpath.c_str());
+                    std::string fragmentShaderString = FileSystem::ReadFile(Fpath.c_str());
+                    const char* vertexShaderText = vertexShaderString.c_str();
+                    const char* fragmentShaderText = fragmentShaderString.c_str();
+                    UpdateShaders(vertexShaderText, fragmentShaderText);
+                }
+                // ImGui::EndGroup();
             }
-            if (ImGui::CollapsingHeader("Interaction (don`t work)")) {
-                ImGui::SliderFloat("##Interaction", &Interaction, 0, 100);
-            }*/
+            if (ImGui::CollapsingHeader("Uniform settings")) {
+                if (ImGui::TreeNode("Color")) {
+                    
+                    
+                    ImGui::ColorEdit3("##MyColor##1", (float*)&color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit3("##MyColor##2", (float*)&color[3], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit3("##MyColor##3", (float*)&color[6], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::ColorEdit3("##MyColor##4", (float*)&color[9], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit3("##MyColor##5", (float*)&color[12], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit3("##MyColor##6", (float*)&color[15], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+                    ImGui::TreePop();
+                };
+                if (ImGui::TreeNode("Rotation")) {
+                    ImGui::SliderFloat3("Rotation1", Rotation, 0, 1);
+                    ImGui::SliderFloat3("Rotation2", &Rotation[3], 0, 1);
+                    ImGui::SliderFloat3("Rotation3", &Rotation[6], 0, 1);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Audio")) {
+                    ImGui::SliderFloat3("Audio", Audio, 0, 3);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("React")) {
+                    ImGui::SliderFloat3("React", React, 0, 1);
+                    ImGui::TreePop();
+                }
+                /* if (ImGui::CollapsingHeader("InteractionPoint (don`t work)")) {
+                        ImGui::SliderFloat2("InteractionPoint", InteractionPoint, -1, 1);
+                    }
+                    if (ImGui::CollapsingHeader("Interaction (don`t work)")) {
+                        ImGui::SliderFloat("##Interaction", &Interaction, 0, 100);
+                    }*/
+            }
+            ImGui::End();
+        }
 
-        ImGui::End();
+        if (show_settings_audio) {
+            ImGui::Begin("Audio settings", &show_settings_shader);
+            if (ImGui::CollapsingHeader("Audio input")) {
+                if (ImGui::TreeNode("Input file")) {
+                    if (ImGui::Button("Select file")) {
+                        ImGui::Text("Comming soon....");
+                    }
+                    ImGui::TreePop();
+                }
+            }
 
+            if (ImGui::CollapsingHeader("Audio Output")) {
+                if (ImGui::TreeNode("Select audio device")) {
+                    if (ImGui::Button("Select audio device")) {
+                        ImGui::Text("Comming soon....");
+                    }
+                    if (ImGui::Button("Analyze")) {
+                        ImGui::Text("Comming soon....");
+                    }
+                    ImGui::TreePop();
+                }
+            }
+
+            if (ImGui::CollapsingHeader("Audio analyzer algoritm")) {
+                if (ImGui::TreeNode("Select audio analyzer algoritm")) {
+                    const char* items[] = { "FFT", "MAX_VOLUME" };
+                    static int item_current = 0;
+
+                    
+                    ImGui::Combo("Select", &item_current, items, IM_ARRAYSIZE(items));
+                    switch (item_current)
+                    {
+                    case 0:
+                        ImGui::Text("FFT");
+                        break;
+                    default:
+                        ImGui::Text("MAX_VOLUME");
+                        break;
+                    }
+                    ImGui::TreePop();
+                }
+
+
+            }
+            ImGui::End();
+        }
+
+        if (show_settings_display) {
+            ImGui::Begin("Display settings", &show_settings_display);
+            ImGui::Text("Vsync");
+            ImGui::SliderInt("##Vsync", &Vsync, 0, 6);
+            ImGui::Text("Resolution scale");
+            ImGui::SliderFloat("##Scale", &Scale, 1.f, 100.f,"%.2f%%");
+            if (ImGui::Checkbox("Fullscreen mode", &fullscreeen_mode)) {
+                //if (!fullscreeen_mode) {
+                //    // Switch to windowed mode
+
+                //    glfwSetWindowMonitor(window, nullptr, 0, 0, display_w, display_h, 0);
+                //    glfwMakeContextCurrent(window);
+                //}
+                //else {
+                //    // Switch to fullscreen mode
+                //    glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+                //}
+            }
+            ImGui::End();
+        }
+
+        if (show_settings_other) {
+            ImGui::Begin("Other", &show_settings_display);
+            ImGui::Text("Light\Dark Theme");
+
+            if (ImGui::Checkbox("Dark mode", &darkTheme)) {
+                if (darkTheme) {
+                    ImGui::StyleColorsDark();
+                }
+                else {
+                    ImGui::StyleColorsLight();
+                }
+            }
+            ImGui::End();
+        }
+        if (show_settings_info) {
+            ImGui::Begin("Info", &show_settings_info);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            
+            if (Vsync) {
+                ImGui::Text("FPS_CAP (MaxMonitorRefrashRate/vSync):%d (%d/%d) ", mode->refreshRate / Vsync, mode->refreshRate, Vsync);
+            }
+            else {
+                ImGui::Text("FPS_CAP (MaxMonitorRefrashRate/vSync):UNLIMITED (%d/%d) ", mode->refreshRate, Vsync);
+            }
+            ImGui::Text("Time %.3f", vTime);
+
+            #ifdef TIMEOUT
+            ImGui::Text("Timeout time:%f", TIMEOUT_TIME-vTime);
+            #endif // TIMEOUT
+
+            ImGui::Text("Screen Size %ix%i", display_w, display_h);
+
+            ImGui::End();
+        }
+
+           
+        
+
+
+
+
+        
 
         // Rendering
         ImGui::Render();
@@ -279,22 +421,21 @@ void APP::MainLoop() {
 
 
 
-        // glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-            //glClear(GL_COLOR_BUFFER_BIT);
+            
 
 
 
 
 
 
-        
 
-       
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
+
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(window);
         }
-    };
+    }
 
 void APP::UpdateShaders(const char* vertexShaderSource, const char* fragmentShaderSource) {
     unsigned static int vertexShader = glCreateShader(GL_VERTEX_SHADER);
