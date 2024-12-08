@@ -36,12 +36,6 @@
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
       <Filter>include</Filter>
     </ClCompile>
-    <ClCompile Include="src\GUI.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Shader.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -50,16 +44,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\GUI.h">
-      <Filter>src\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>src\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils.h">
-      <Filter>src\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Shader.h">
       <Filter>src\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\App.h">
