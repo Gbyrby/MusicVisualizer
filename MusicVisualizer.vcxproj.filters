@@ -42,6 +42,9 @@
     <ClCompile Include="src\App.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ImGUIManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -51,6 +54,9 @@
       <Filter>src\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\App.h">
+      <Filter>src\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImGUIManager.h">
       <Filter>src\Headers</Filter>
     </ClInclude>
   </ItemGroup>

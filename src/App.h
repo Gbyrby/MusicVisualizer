@@ -1,3 +1,4 @@
+#pragma once
 #include "Utils.h"
 
 #define GLEW_STATIC
@@ -19,6 +20,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "ImGUIManager.h"
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -29,6 +31,7 @@ static void glfw_error_callback(int error, const char* description)
 
 
 class APP {
+public:
     GLFWwindow* window;
     int static display_w, display_h;
     static int Vsync;
@@ -46,12 +49,12 @@ class APP {
     int vInteractionLocation = 0;
 
     float color[18] = {
-            1.0f, 0.0f, 1.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f
+        1.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 1.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 0.0f
     };
     float Audio[3] = {
         1.0f, 1.0f, 1.0f,
@@ -70,9 +73,11 @@ class APP {
     };
     float Interaction = 0.0f;
 
+ 
+    
 
 
-public:
+
     APP(int ScrenWidth = 1280, int ScreenHeight = 720);
 
     void MainLoop();

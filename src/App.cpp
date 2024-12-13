@@ -1,4 +1,4 @@
-#include "App.h"
+#pragma once
 
 
 #ifdef _DEBUG
@@ -6,13 +6,15 @@
 #define TIMEOUT_TIME 120
 #endif // DEBUG
 
+#include "App.h"
 
+ImGUIManager GUI;
 
 APP::APP(int ScrenWidth, int ScreenHeight) {
-
+    
     glfwSetErrorCallback(glfw_error_callback);
     glfwInit();
-
+    
     // Decide GL+GLSL versions
     #if defined(IMGUI_IMPL_OPENGL_ES2)
     // GL ES 2.0 + GLSL 100
@@ -63,7 +65,7 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
     ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
     #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
-
+    
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -98,14 +100,14 @@ APP::APP(int ScrenWidth, int ScreenHeight) {
 };
 
 void APP::MainLoop() {
-
+    
     ImGuiIO& io = ImGui::GetIO();
 
     static GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     static const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
+    
     bool static darkTheme = true;
-
+    
     bool static show_demo_window = true;
     bool static show_dockspace = true;
     bool static show_settings_shader = true;
@@ -142,7 +144,7 @@ void APP::MainLoop() {
             break;
         }
 #endif // TIMEOUT
-
+        
         glfwGetFramebufferSize(this->window, &display_w, &display_h);
         
         // Poll and handle events (inputs, window resize, etc.)
@@ -225,9 +227,11 @@ void APP::MainLoop() {
             }
         }
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        #ifdef _DEBUG
         if (show_demo_window) 
             (ImGui::ShowDemoWindow(&show_demo_window));
-        
+
+        #endif // DEBUG
 
         if (show_settings_shader) {
             // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
@@ -258,8 +262,8 @@ void APP::MainLoop() {
             }
             if (ImGui::CollapsingHeader("Uniform settings")) {
                 if (ImGui::TreeNode("Color")) {
-                    
-                    
+
+
                     ImGui::ColorEdit3("##MyColor##1", (float*)&color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
                     ImGui::SameLine();
                     ImGui::ColorEdit3("##MyColor##2", (float*)&color[3], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
@@ -295,110 +299,15 @@ void APP::MainLoop() {
             }
             ImGui::End();
         }
+        
+        GUI.CreateAudioTab(&show_settings_audio);
 
-        if (show_settings_audio) {
-            ImGui::Begin("Audio settings", &show_settings_shader);
-            if (ImGui::CollapsingHeader("Audio input")) {
-                if (ImGui::TreeNode("Input file")) {
-                    if (ImGui::Button("Select file")) {
-                        ImGui::Text("Comming soon....");
-                    }
-                    ImGui::TreePop();
-                }
-            }
+        GUI.CreateDisplayTab(&show_settings_display, &Vsync, &Scale, &fullscreeen_mode);
 
-            if (ImGui::CollapsingHeader("Audio Output")) {
-                if (ImGui::TreeNode("Select audio device")) {
-                    if (ImGui::Button("Select audio device")) {
-                        ImGui::Text("Comming soon....");
-                    }
-                    if (ImGui::Button("Analyze")) {
-                        ImGui::Text("Comming soon....");
-                    }
-                    ImGui::TreePop();
-                }
-            }
+        GUI.CreateOtherTab(&show_settings_other, &darkTheme);
 
-            if (ImGui::CollapsingHeader("Audio analyzer algoritm")) {
-                if (ImGui::TreeNode("Select audio analyzer algoritm")) {
-                    const char* items[] = { "FFT", "MAX_VOLUME" };
-                    static int item_current = 0;
+        GUI.CreateInfoTab(&show_settings_info,mode->refreshRate, display_w, display_h, Vsync, vTime);
 
-                    
-                    ImGui::Combo("Select", &item_current, items, IM_ARRAYSIZE(items));
-                    switch (item_current)
-                    {
-                    case 0:
-                        ImGui::Text("FFT");
-                        break;
-                    default:
-                        ImGui::Text("MAX_VOLUME");
-                        break;
-                    }
-                    ImGui::TreePop();
-                }
-
-
-            }
-            ImGui::End();
-        }
-
-        if (show_settings_display) {
-            ImGui::Begin("Display settings", &show_settings_display);
-            ImGui::Text("Vsync");
-            ImGui::SliderInt("##Vsync", &Vsync, 0, 6);
-            ImGui::Text("Resolution scale");
-            ImGui::SliderFloat("##Scale", &Scale, 1.f, 100.f,"%.2f%%");
-            if (ImGui::Checkbox("Fullscreen mode", &fullscreeen_mode)) {
-                //if (!fullscreeen_mode) {
-                //    // Switch to windowed mode
-
-                //    glfwSetWindowMonitor(window, nullptr, 0, 0, display_w, display_h, 0);
-                //    glfwMakeContextCurrent(window);
-                //}
-                //else {
-                //    // Switch to fullscreen mode
-                //    glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-                //}
-            }
-            ImGui::End();
-        }
-
-        if (show_settings_other) {
-            ImGui::Begin("Other", &show_settings_display);
-            ImGui::Text("Light\Dark Theme");
-
-            if (ImGui::Checkbox("Dark mode", &darkTheme)) {
-                if (darkTheme) {
-                    ImGui::StyleColorsDark();
-                }
-                else {
-                    ImGui::StyleColorsLight();
-                }
-            }
-            ImGui::End();
-        }
-        if (show_settings_info) {
-            ImGui::Begin("Info", &show_settings_info);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            
-            if (Vsync) {
-                ImGui::Text("FPS_CAP (MaxMonitorRefrashRate/vSync):%d (%d/%d) ", mode->refreshRate / Vsync, mode->refreshRate, Vsync);
-            }
-            else {
-                ImGui::Text("FPS_CAP (MaxMonitorRefrashRate/vSync):UNLIMITED (%d/%d) ", mode->refreshRate, Vsync);
-            }
-            ImGui::Text("Time %.3f", vTime);
-
-            #ifdef TIMEOUT
-            ImGui::Text("Timeout time:%f", TIMEOUT_TIME-vTime);
-            #endif // TIMEOUT
-
-            ImGui::Text("Screen Size %ix%i", display_w, display_h);
-
-            ImGui::End();
-        }
 
            
         
