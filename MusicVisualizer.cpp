@@ -1,12 +1,15 @@
+﻿#include "App.h"
 
-
-#include "App.h"
 
 
 // Main code
 int main(int, char**)
-{   
-    APP app;
+{
+
+    App app;
     app.MainLoop();
+    
+
+    
     return 0;
 }
