@@ -1,0 +1,17 @@
+{
+  "dependencies": [
+    "fftw3",
+    "glew",
+    "glfw3",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
+    "libsndfile",
+    "opengl",
+    "portaudio"
+  ]
+}
