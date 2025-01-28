@@ -60,3 +60,4 @@ but for some reason, I get errors in missing environment variables:
 	- Remove magic numbers
 	- Using ImGui::console, not std cout
 	- Understand how to compile for windows and linux using only console\terminal
+	 
