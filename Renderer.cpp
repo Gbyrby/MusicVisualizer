@@ -112,6 +112,7 @@ void Renderer::UpdateShaders(const char* vertexShaderSource, const char* fragmen
     if (!success)
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "glCompileShader(vertexShader)" << infoLog << std::endl;
     }
     // fragment shader
     unsigned static int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -122,6 +123,7 @@ void Renderer::UpdateShaders(const char* vertexShaderSource, const char* fragmen
     if (!success)
     {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "glCompileShader(fragmentShader)" << infoLog << std::endl;
     }
     // link shaders
     shaderProgram = glCreateProgram();
@@ -132,6 +134,7 @@ void Renderer::UpdateShaders(const char* vertexShaderSource, const char* fragmen
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "glLinkProgram(shaderProgram)" << infoLog << std::endl;
     }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);

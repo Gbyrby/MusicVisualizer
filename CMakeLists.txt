@@ -39,8 +39,6 @@ target_link_libraries(MusicVisualizer PRIVATE SndFile::sndfile FFTW3::fftw3)
 find_package(GLEW REQUIRED)
 target_link_libraries(MusicVisualizer PRIVATE GLEW::GLEW)
 
-find_package(portaudio CONFIG REQUIRED)
-target_link_libraries(MusicVisualizer PRIVATE portaudio)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET MusicVisualizer PROPERTY CXX_STANDARD 20)

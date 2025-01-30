@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 #include <complex>
-#include <portaudio.h>
 
 class Audio {
 public:
@@ -34,7 +33,7 @@ private:
 	SNDFILE* infile;
 
 	int startSample = 0;
-	int segmentLength = 2048/2; // Длина сегмента (например, 2048 отсчетов)
+	int segmentLength = 2048/2; // Р”Р»РёРЅР° СЃРµРіРјРµРЅС‚Р° (РЅР°РїСЂРёРјРµСЂ, 2048 РѕС‚СЃС‡РµС‚РѕРІ)
 	bool File_opened = false;
 
 	bool useFFT = true;
