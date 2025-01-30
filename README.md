@@ -14,27 +14,22 @@ Customizable shader from Yandex music on C++
 4. Build by VS 2022 
 4. add folder **ShaderCode** and **audio.mp3** to the path where the exe file was created.
 
-# Build on Linux:
->
-> Requirement:
-> vcpkg, CMake, Git
+# Build on Linux (Ubuntu 24.04.1):
+## Install vcpkg
+instruction for install [vcpkg](https://www.followchain.org/install-vcpkg-on-ubuntu/)
+in Ubuntu
 
-i dont know :/
-
-It should be something like:
+## Get DCMAKE_TOOLCHAIN_FILE path
 ```PowerShell
 vcpkg integrate install
-vcpkg install
-mkdir build
-cd build
-cmake ..
+```
+## Build with cmake
+```PowerShell
+cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg.cmake
+make
+./MusicVisualizer 
 ```
 
-but for some reason, I get errors in missing environment variables:
-
-	VCPKG_ROOT
-	CMAKE_C_COMPILER
-	CMAKE_CXX_COMPILER
 
 # TODO:
 * Refactoring
@@ -59,5 +54,5 @@ but for some reason, I get errors in missing environment variables:
 	- Optimization CPU load
 	- Remove magic numbers
 	- Using ImGui::console, not std cout
-	- Understand how to compile for windows and linux using only console\terminal
+	- ~~Understand how to compile for windows and linux using only console\terminal~~
 	 
